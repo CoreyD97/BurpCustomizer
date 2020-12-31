@@ -71,11 +71,11 @@ All theme credits go to their original authors.
 
 ---
 
-###Installing:
+### Installing:
 1. Download the latest jar from https://github.com/CoreyD97/BurpCustomizer/releases
 2. Add the jar to Burp Suite.
 
-###Usage:
+### Usage:
 1. Select the correct base theme from Burp's "User options -> Display" menu, to set the correct icon pack.
 2. Choose a theme from within the Burp Customizer tab.
 3. If you like the project, please give the repo a star! <3
@@ -84,7 +84,7 @@ All theme credits go to their original authors.
 
 ---
 
-###Building:
+### Building:
 If you want to build the project from source, e.g. for tweaking, or development
 1. Clone the repo
 2. Use gradle to build the jar: `gradle jar`
