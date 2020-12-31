@@ -1,0 +1,35 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
+dependencies {
+    compile 'net.portswigger.burp.extender:burp-extender-api:1.7.22'
+    compile 'com.github.CoreyD97:BurpExtenderUtilities:409993f'
+    compile 'com.formdev:flatlaf:0.45'
+    compile 'com.formdev:flatlaf-intellij-themes:0.45'
+    testCompile 'com.formdev:flatlaf-extras:0.45'
+    testCompile files('/opt/BurpSuitePro/burpsuite_pro.jar')
+//    testCompile files('/home/corey/BurpSuiteCommunity/burpsuite_community.jar')
+    testRuntime files('/tmp/test.jar')
+}
+
+jar {
+    baseName = project.name
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+tasks.withType(Jar) {
+    destinationDir = file("$rootDir/releases")
+}
