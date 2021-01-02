@@ -11,12 +11,10 @@ public class CustomTheme extends IntelliJTheme.ThemeLaf {
 
     Class burpDark, burpLight;
 
-    public CustomTheme(IntelliJTheme.ThemeLaf base){
+    public CustomTheme(IntelliJTheme.ThemeLaf base) throws ClassNotFoundException {
         super(base.getTheme());
-        try{
-            this.burpDark = Class.forName("burp.theme.BurpDarkLaf");
-            this.burpLight = Class.forName("burp.theme.BurpLightLaf");
-        } catch (ClassNotFoundException e) { }
+        this.burpDark = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpDarkLaf");
+        this.burpLight = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpLightLaf");
     }
 
     @Override

@@ -13,12 +13,12 @@ repositories {
 dependencies {
     compile 'net.portswigger.burp.extender:burp-extender-api:1.7.22'
     compile 'com.github.CoreyD97:BurpExtenderUtilities:409993f'
-    compile 'com.formdev:flatlaf:0.45'
+    compileOnly 'com.formdev:flatlaf:0.45'
     compile 'com.formdev:flatlaf-intellij-themes:0.45'
     testCompile 'com.formdev:flatlaf-extras:0.45'
     testCompile files('/opt/BurpSuitePro/burpsuite_pro.jar')
 //    testCompile files('/home/corey/BurpSuiteCommunity/burpsuite_community.jar')
-    testRuntime files('/tmp/test.jar')
+//    testRuntime files('/tmp/test.jar')
 }
 
 jar {

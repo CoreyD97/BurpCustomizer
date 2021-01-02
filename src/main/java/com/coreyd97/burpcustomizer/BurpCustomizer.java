@@ -13,6 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
 
 
         try{
-            Class.forName("burp.theme.BurpDarkLaf");
+            ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpDarkLaf");
             compatible = true;
         } catch (ClassNotFoundException e) {
             compatible = false;
@@ -119,7 +121,10 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
             selectedTheme = lookAndFeelInfo;
             callbacks.saveExtensionSetting("theme", lookAndFeelInfo.getClassName());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            callbacks.printError("Could not load theme.");
+            callbacks.printError(sw.toString());
             JOptionPane.showMessageDialog(getUiComponent(), "Could not load the specified theme.", "Burp Customizer", JOptionPane.ERROR_MESSAGE);
         }
     }
