@@ -64,10 +64,6 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
             previousTheme.ifPresent(BurpCustomizer.this::setTheme);
             this.ui = new CustomizerPanel(this);
 
-            Arrays.stream(Frame.getFrames()).filter(frame -> frame.getTitle().startsWith("Burp Suite") && frame.isVisible()).findFirst().ifPresent(frame -> {
-                frame.setTitle("Burp Customizer - By CoreyD97");
-            });
-
 //            Arrays.stream(Frame.getFrames()).filter(frame -> frame.getTitle().startsWith("Burp Suite") && frame.isVisible() && frame.getMenuBar() != null).findFirst().ifPresent(frame -> {
 //                menuItem = new JMenu("Customize");
 //                menuItem.addMouseListener(new MouseAdapter() {
