@@ -80,7 +80,7 @@ All theme credits go to their original authors.
 2. Choose a theme from within the Burp Customizer tab.
 3. If you like the project, please give the repo a star! <3
 
-![Stargazers](https://starchart.cc/coreyd97/BurpCustomizer.svg)
+[![Stargazers over time](https://starchart.cc/CoreyD97/BurpCustomizer.svg)](https://starchart.cc/CoreyD97/BurpCustomizer)
 
 ---
 
