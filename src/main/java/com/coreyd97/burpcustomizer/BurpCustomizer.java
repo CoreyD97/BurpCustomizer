@@ -11,14 +11,13 @@ import com.formdev.flatlaf.intellijthemes.FlatAllIJThemes;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Optional;
 
 public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListener {
@@ -34,6 +33,7 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
 
     public BurpCustomizer(){
         themes = new ArrayList<>(Arrays.asList(FlatAllIJThemes.INFOS));
+        themes.sort(Comparator.comparing(UIManager.LookAndFeelInfo::getName));
     }
 
     @Override
