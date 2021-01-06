@@ -79,6 +79,7 @@ public class CustomTheme extends IntelliJTheme.ThemeLaf {
         defaults.put("Burp.inspectorEmptyCollapsedViewLabelForeground", "lazy(Label.foreground)");
 //        defaults.put("Burp.inspectorSeeMoreHoverBackground", "#7DFF15FF");
 //        defaults.put("Burp.inspectorSeeMorePressedBackground", "#1DB485FF");
+        defaults.put("TabbedPane.selectedBackground", "lazy(TabbedPane.background)");
 
         defaults.put("Burp.filterBarForeground", "lazy(TextField.foreground)");
         defaults.put("Burp.filterBarBackground", "lazy(TextField.background)");

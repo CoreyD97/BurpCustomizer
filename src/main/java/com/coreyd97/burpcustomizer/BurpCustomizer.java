@@ -114,6 +114,9 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
 
             UIManager.setLookAndFeel(laf);
             FlatLaf.updateUI();
+            //Hack since some elements were using the previous LaF when toggled. See GitHub issue #4.
+            UIManager.setLookAndFeel(laf);
+            FlatLaf.updateUI();
             selectedTheme = lookAndFeelInfo;
             callbacks.saveExtensionSetting("theme", lookAndFeelInfo.getClassName());
         } catch (Exception ex) {
