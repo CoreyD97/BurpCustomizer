@@ -135,6 +135,8 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
         try {
             UIManager.setLookAndFeel(originalBurpTheme);
             FlatLaf.updateUI();
+            UIManager.setLookAndFeel(originalBurpTheme);
+            FlatLaf.updateUI();
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
