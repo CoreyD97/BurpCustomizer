@@ -3,20 +3,18 @@ package com.coreyd97.burpcustomizer;
 import com.coreyd97.BurpExtenderUtilities.Alignment;
 import com.coreyd97.BurpExtenderUtilities.PanelBuilder;
 import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.IntelliJTheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -24,6 +22,7 @@ import java.net.URL;
 public class CustomizerPanel extends JPanel {
 
     JButton viewOnGithubButton;
+    LookAndFeel selectedLaF;
 
     public CustomizerPanel(BurpCustomizer customizer){
         this.setLayout(new BorderLayout());
@@ -127,6 +126,9 @@ public class CustomizerPanel extends JPanel {
 
         aboutContent.setBorder(new EmptyBorder(0, 0, 20, 0));
 
+        PreviewPanel previewPanel = new PreviewPanel();
+        previewPanel.setBorder(new EmptyBorder(10, 0, 10, 0));
+
         JLabel themeLabel = new JLabel("Select Theme");
         themeLabel.setFont(themeLabel.getFont().deriveFont(Font.BOLD));
 
@@ -135,39 +137,84 @@ public class CustomizerPanel extends JPanel {
         for (UIManager.LookAndFeelInfo theme : customizer.getThemes()) {
             lookAndFeelSelector.addItem(theme);
         }
-        lookAndFeelSelector.setSelectedItem(customizer.getSelectedTheme());
+        JLabel defaultThemeLabel = new JLabel("Default Themes: ");
+        defaultThemeLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("IntelliJ Theme File (.theme.json)", "json"));
+        JButton selectFileButton = new JButton("Select Theme File...");
+
         lookAndFeelSelector.addItemListener(e -> {
             if(e.getStateChange() == ItemEvent.SELECTED) {
-                customizer.setTheme((UIManager.LookAndFeelInfo) e.getItem());
+                System.out.println(e.getItem());
+                fileChooser.setSelectedFile(null);
+                selectFileButton.setText("Select Theme File...");
+                try{
+                    LookAndFeel theme = customizer.createThemeFromDefaults((UIManager.LookAndFeelInfo) e.getItem());
+                    previewPanel.setTheme(theme);
+                }catch (Exception ex){
+                    previewPanel.reset();
+                    JOptionPane.showMessageDialog(CustomizerPanel.this, "Could not load the specified theme.\n" + ex.getMessage(), "Burp Customizer", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        JLabel fileThemeLabel = new JLabel("Theme File: ");
+        fileThemeLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        selectFileButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int res = fileChooser.showOpenDialog(CustomizerPanel.this);
+                if(res == JFileChooser.APPROVE_OPTION){
+                    selectFileButton.setText(fileChooser.getSelectedFile().getName());
+                    try {
+                        LookAndFeel theme = customizer.createThemeFromFile(fileChooser.getSelectedFile());
+                        previewPanel.setTheme(theme);
+                    } catch (IOException | UnsupportedLookAndFeelException ex) {
+                        previewPanel.reset();
+                        JOptionPane.showMessageDialog(CustomizerPanel.this, "Could not load the specified theme.\n" + ex.getMessage(), "Burp Customizer", JOptionPane.ERROR_MESSAGE);
+                    }
+                    lookAndFeelSelector.setSelectedItem(null);
+                }else{
+                    selectFileButton.setText("Select Theme File...");
+                }
+            }
+        });
+
+        JButton applyThemeButton = new JButton(new AbstractAction("Apply") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(lookAndFeelSelector.getSelectedItem() != null) {
+                    customizer.setTheme((UIManager.LookAndFeelInfo) lookAndFeelSelector.getSelectedItem());
+                }else if(fileChooser.getSelectedFile() != null){
+                    customizer.setTheme(fileChooser.getSelectedFile());
+                }else{
+                    JOptionPane.showMessageDialog(CustomizerPanel.this, "No theme selected!", "Burp Customizer", JOptionPane.ERROR_MESSAGE);
+                }
                 viewOnGithubButton.setIcon(getGithubIcon());
             }
         });
 
-
-//        JFileChooser fc = new JFileChooser();
-//        fc.addChoosableFileFilter(new FileNameExtensionFilter("IntelliJ Theme File", ".theme.json"));
-//        JButton selectFileButton = new JButton("Select Theme File...");
-//
-//        selectFileButton.addActionListener(new AbstractAction() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                int res = fc.showOpenDialog(CustomizerPanel.this);
-//                if(res == JFileChooser.APPROVE_OPTION){
-//                    selectFileButton.setText(fc.getSelectedFile().getName());
-//                }else{
-//                    selectFileButton.setText("Select Theme File...");
-//                }
-//            }
-//        });
-
-//        JButton loadFromFileButton = new JButton("Load");
+        if(customizer.getThemeSource() == BurpCustomizer.ThemeSource.BUILTIN && customizer.getSelectedBuiltIn() != null) {
+            lookAndFeelSelector.setSelectedItem(customizer.getSelectedBuiltIn());
+        } else if(customizer.getThemeSource() == BurpCustomizer.ThemeSource.FILE && customizer.getSelectedThemeFile() != null) {
+            lookAndFeelSelector.setSelectedItem(null);
+            File selectedFile = customizer.getSelectedThemeFile();
+            selectFileButton.setText(selectedFile.getName());
+            fileChooser.setSelectedFile(selectedFile);
+        }
 
         JPanel selectorPanel = PanelBuilder.build(new Component[][]{
                 new Component[]{themeLabel, themeLabel},
-                new Component[]{lookAndFeelSelector, lookAndFeelSelector},
-//                new Component[]{loadFromFile, lookAndFeelSelector},
+                new Component[]{defaultThemeLabel, lookAndFeelSelector},
+                new Component[]{fileThemeLabel, selectFileButton},
+                new Component[]{previewPanel, previewPanel},
+                new Component[]{applyThemeButton, applyThemeButton},
         }, new int[][]{
                 new int[]{0, 0},
+                new int[]{1, 1},
+                new int[]{1, 1},
                 new int[]{1, 1},
         }, Alignment.FILL, 1.0, 1.0);
 

@@ -1,20 +1,24 @@
-package com.formdev.flatlaf;
+package com.coreyd97.burpcustomizer;
 
-import com.coreyd97.burpcustomizer.BurpCustomizer;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.IntelliJTheme;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 public class CustomTheme extends IntelliJTheme.ThemeLaf {
 
     Class burpDark, burpLight;
 
-    public CustomTheme(IntelliJTheme.ThemeLaf base) throws ClassNotFoundException {
+    public CustomTheme(IntelliJTheme.ThemeLaf base) {
         super(base.getTheme());
-        this.burpDark = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpDarkLaf");
-        this.burpLight = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpLightLaf");
+        try {
+            this.burpDark = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpDarkLaf");
+            this.burpLight = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpLightLaf");
+        }catch (Exception e){
+            throw new RuntimeException("Cannot find required Burp themes. " +
+                    "This shouldn't happen as we shouldn't try to switch the theme if it's not supported.");
+        }
     }
 
     @Override

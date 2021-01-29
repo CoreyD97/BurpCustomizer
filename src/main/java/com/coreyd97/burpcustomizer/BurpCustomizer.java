@@ -4,15 +4,13 @@ import burp.IBurpExtender;
 import burp.IBurpExtenderCallbacks;
 import burp.IExtensionStateListener;
 import burp.ITab;
-import com.formdev.flatlaf.CustomTheme;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.IntelliJTheme;
 import com.formdev.flatlaf.intellijthemes.FlatAllIJThemes;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -22,10 +20,13 @@ import java.util.Optional;
 
 public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListener {
 
+    enum ThemeSource {BUILTIN, FILE}
     private boolean compatible;
     private LookAndFeel originalBurpTheme;
     private ArrayList<UIManager.LookAndFeelInfo> themes;
-    private UIManager.LookAndFeelInfo selectedTheme;
+    private UIManager.LookAndFeelInfo selectedBuiltIn;
+    private File selectedThemeFile;
+    private ThemeSource themeSource;
     private CustomizerPanel ui;
     public static IBurpExtenderCallbacks callbacks;
     JMenuBar menuBar;
@@ -40,9 +41,24 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
         BurpCustomizer.callbacks = callbacks;
         originalBurpTheme = UIManager.getLookAndFeel();
-        String theme = callbacks.loadExtensionSetting("theme");
+
+        String sourceEnum = callbacks.loadExtensionSetting("source");
+        if(sourceEnum.equalsIgnoreCase("")){
+            themeSource = ThemeSource.BUILTIN;
+        }else {
+            themeSource = ThemeSource.valueOf(sourceEnum);
+        }
+
+        String builtIn = callbacks.loadExtensionSetting("theme");
         Optional<UIManager.LookAndFeelInfo> previousTheme =
-                themes.stream().filter(lookAndFeelInfo -> lookAndFeelInfo.getClassName().equalsIgnoreCase(theme)).findFirst();
+                themes.stream().filter(lookAndFeelInfo -> lookAndFeelInfo.getClassName().equalsIgnoreCase(builtIn)).findFirst();
+        if(previousTheme.isPresent()) selectedBuiltIn = previousTheme.get();
+
+        String themeFilePref = callbacks.loadExtensionSetting("themeFile");
+        if(!themeFilePref.equalsIgnoreCase("")){
+            selectedThemeFile = new File(themeFilePref);
+            if(!selectedThemeFile.exists()) selectedThemeFile = null;
+        }
 
 
         try{
@@ -61,7 +77,11 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
         }
 
         SwingUtilities.invokeLater(() -> {
-            previousTheme.ifPresent(BurpCustomizer.this::setTheme);
+            if(themeSource == ThemeSource.BUILTIN && selectedBuiltIn != null){
+                setTheme(selectedBuiltIn);
+            }else if(themeSource == ThemeSource.FILE && selectedThemeFile != null){
+                setTheme(selectedThemeFile);
+            }
             this.ui = new CustomizerPanel(this);
 
 //            Arrays.stream(Frame.getFrames()).filter(frame -> frame.getTitle().startsWith("Burp Suite") && frame.isVisible() && frame.getMenuBar() != null).findFirst().ifPresent(frame -> {
@@ -93,8 +113,16 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
         return this.ui;
     }
 
-    public UIManager.LookAndFeelInfo getSelectedTheme() {
-        return selectedTheme;
+    public UIManager.LookAndFeelInfo getSelectedBuiltIn() {
+        return selectedBuiltIn;
+    }
+
+    public File getSelectedThemeFile() {
+        return selectedThemeFile;
+    }
+
+    public ThemeSource getThemeSource(){
+        return this.themeSource;
     }
 
     public ArrayList<UIManager.LookAndFeelInfo> getThemes(){
@@ -108,24 +136,59 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
     public void setTheme(UIManager.LookAndFeelInfo lookAndFeelInfo){
         if(!compatible) return;
         try {
-            Class themeClass = Class.forName(lookAndFeelInfo.getClassName());
-            IntelliJTheme.ThemeLaf theme = (IntelliJTheme.ThemeLaf) themeClass.getDeclaredConstructor().newInstance();
-            LookAndFeel laf = new CustomTheme(theme);
+            LookAndFeel laf = createThemeFromDefaults(lookAndFeelInfo);
 
             UIManager.setLookAndFeel(laf);
             FlatLaf.updateUI();
             //Hack since some elements were using the previous LaF when toggled. See GitHub issue #4.
             UIManager.setLookAndFeel(laf);
             FlatLaf.updateUI();
-            selectedTheme = lookAndFeelInfo;
+            selectedBuiltIn = lookAndFeelInfo;
             callbacks.saveExtensionSetting("theme", lookAndFeelInfo.getClassName());
+            callbacks.saveExtensionSetting("source", ThemeSource.BUILTIN.toString());
         } catch (Exception ex) {
             StringWriter sw = new StringWriter();
             ex.printStackTrace(new PrintWriter(sw));
             callbacks.printError("Could not load theme.");
             callbacks.printError(sw.toString());
-            JOptionPane.showMessageDialog(getUiComponent(), "Could not load the specified theme.", "Burp Customizer", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(getUiComponent(), "Could not load the specified theme.\n" + ex.getMessage(), "Burp Customizer", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    public LookAndFeel createThemeFromDefaults(UIManager.LookAndFeelInfo lookAndFeelInfo) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class themeClass = Class.forName(lookAndFeelInfo.getClassName());
+        IntelliJTheme.ThemeLaf theme = (IntelliJTheme.ThemeLaf) themeClass.getDeclaredConstructor().newInstance();
+        return new CustomTheme(theme);
+    }
+
+    public void setTheme(File themeJsonFile){
+        try {
+            LookAndFeel lookAndFeel = createThemeFromFile(themeJsonFile);
+
+            UIManager.setLookAndFeel(lookAndFeel);
+            FlatLaf.updateUI();
+
+            selectedThemeFile = themeJsonFile;
+            callbacks.saveExtensionSetting("themeFile", themeJsonFile.getAbsolutePath());
+            callbacks.saveExtensionSetting("source", ThemeSource.FILE.toString());
+        } catch (IOException | UnsupportedLookAndFeelException ex) {
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            callbacks.printError("Could not load theme.");
+            callbacks.printError(sw.toString());
+            JOptionPane.showMessageDialog(getUiComponent(), "Could not load the specified theme:\n" + ex.getMessage(), "Burp Customizer", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public LookAndFeel createThemeFromFile(File themeJsonFile) throws IOException, UnsupportedLookAndFeelException {
+        IntelliJTheme intelliJTheme = new IntelliJTheme(new FileInputStream(themeJsonFile));
+        IntelliJTheme.ThemeLaf fileTheme = new IntelliJTheme.ThemeLaf(intelliJTheme);
+        if(intelliJTheme.name == null && intelliJTheme.author == null){
+            throw new UnsupportedLookAndFeelException(themeJsonFile.getName() + " does not appear to be a valid theme file.\n" +
+                    "If it is, make sure it has a json attribute \"name\".");
+        }
+
+        return new CustomTheme(fileTheme);
     }
 
     @Override
