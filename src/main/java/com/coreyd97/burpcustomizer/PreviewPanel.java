@@ -5,6 +5,9 @@ import com.coreyd97.BurpExtenderUtilities.PanelBuilder;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 
 public class PreviewPanel extends JPanel {
@@ -25,19 +28,22 @@ public class PreviewPanel extends JPanel {
         noSelected.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         noSelected.setHorizontalAlignment(JLabel.CENTER);
         this.add(noSelected, BorderLayout.CENTER);
+        this.revalidate();
+        this.repaint();
     }
 
     public void setTheme(LookAndFeel lookAndFeel) throws UnsupportedLookAndFeelException {
         LookAndFeel oldLaf = UIManager.getLookAndFeel();
         UIManager.setLookAndFeel(lookAndFeel);
         this.removeAll();
-        JPanel previewContent = buildPreviewContent();
-        previewContent.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JComponent previewContent = buildPreviewContent();
         this.add(previewContent, BorderLayout.CENTER);
         UIManager.setLookAndFeel(oldLaf);
+        this.revalidate();
+        this.repaint();
     }
 
-    public JPanel buildPreviewContent(){
+    public JComponent buildPreviewContent(){
         JLabel jLabelEnabled = new JLabel("Enabled");
         JLabel jLabelDisabled = new JLabel("Disabled");
         jLabelDisabled.setEnabled(false);
@@ -96,7 +102,7 @@ public class PreviewPanel extends JPanel {
         JPasswordFieldEnabledNotEditable.setEditable(false);
         
         
-        return PanelBuilder.build(new Component[][]{
+        JPanel basicComponents = PanelBuilder.build(new Component[][]{
                 new Component[]{new JLabel("JLabel:"), jLabelEnabled, jLabelDisabled, null, null},
                 new Component[]{new JLabel("JButton:"), jbuttonEnabled, jbuttonDisabled, null, null},
                 new Component[]{new JLabel("JCheckBox:"), JCheckBoxEnabled, JCheckBoxDisabled, JCheckBoxEnabledSelected, JCheckBoxDisabledSelected},
@@ -106,6 +112,50 @@ public class PreviewPanel extends JPanel {
                 new Component[]{new JLabel("JTextField:"), JTextFieldEnabled, JTextFieldDisabled, JTextFieldEnabledNotEditable, JTextFieldDisabledNotEditable},
                 new Component[]{new JLabel("JPasswordField:"), JPasswordFieldEnabled, JPasswordFieldDisabled, JPasswordFieldEnabledNotEditable, JPasswordFieldDisabledNotEditable},
         }, Alignment.FILL, 1.0, 1.0);
+        basicComponents.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        JTextArea jTextArea = new JTextArea("An editable text area");
+        jTextArea.setWrapStyleWord(true);
+        JScrollPane jScrollPane = new JScrollPane(jTextArea);
+        jScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        JTable jTable = new JTable(new Object[][]{new Object[]{false,"A","1", "?"}, new Object[]{true,"B","2", "!"}}, new String[]{"Boolean", "Letters", "Numbers", "Symbols"});
+        DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode("Items");
+        treeNode.add(new DefaultMutableTreeNode("Item A"));
+        treeNode.add(new DefaultMutableTreeNode("Item B"));
+        DefaultMutableTreeNode childNode = new DefaultMutableTreeNode("Item C");
+        childNode.add(new DefaultMutableTreeNode("C - 1"));
+        childNode.add(new DefaultMutableTreeNode("C - 2"));
+        childNode.add(new DefaultMutableTreeNode("C - 3"));
+        treeNode.add(childNode);
+
+        JTree jTree = new JTree(treeNode);
+        JList<String> jList = new JList<>(new String[]{"Item A","Item B","Item C","Item D","Item E","Item F"});
+
+        JPanel otherComponents = PanelBuilder.build(new Component[][]{
+                new Component[]{new JLabel("JEditor"), null},
+                new Component[]{jScrollPane, jScrollPane},
+                new Component[]{jScrollPane, jScrollPane},
+                new Component[]{new JLabel("JTable"), null},
+                new Component[]{jTable, jTable},
+                new Component[]{new JLabel("JTree"), new JLabel("JList")},
+                new Component[]{new JScrollPane(jTree), new JScrollPane(jList)},
+        }, new int[][]{
+                new int[]{0, 0},
+                new int[]{1, 1},
+                new int[]{1, 1},
+                new int[]{0, 0},
+                new int[]{1, 1},
+                new int[]{0, 0},
+                new int[]{5, 5},
+        }, Alignment.FILL, 1.0, 1.0);
+
+        JTabbedPane jTabbedPane = new JTabbedPane();
+        jTabbedPane.add("Basic", basicComponents);
+        jTabbedPane.add("Data", otherComponents);
+
+        JPanel jPanel = new JPanel(new BorderLayout());
+        jPanel.add(jTabbedPane, BorderLayout.CENTER);
+        return jPanel;
     }
 
 }

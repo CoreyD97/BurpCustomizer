@@ -140,9 +140,6 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
 
             UIManager.setLookAndFeel(laf);
             FlatLaf.updateUI();
-            //Hack since some elements were using the previous LaF when toggled. See GitHub issue #4.
-            UIManager.setLookAndFeel(laf);
-            FlatLaf.updateUI();
             selectedBuiltIn = lookAndFeelInfo;
             callbacks.saveExtensionSetting("theme", lookAndFeelInfo.getClassName());
             callbacks.saveExtensionSetting("source", ThemeSource.BUILTIN.toString());
@@ -195,13 +192,11 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
     public void extensionUnloaded() {
         BurpCustomizer.callbacks = null;
         if(menuBar != null && menuItem != null) menuBar.remove(menuItem);
-        try {
-            UIManager.setLookAndFeel(originalBurpTheme);
-            FlatLaf.updateUI();
-            UIManager.setLookAndFeel(originalBurpTheme);
-            FlatLaf.updateUI();
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(originalBurpTheme);
+                FlatLaf.updateUI();
+            } catch (UnsupportedLookAndFeelException e) {}
+        });
     }
 }
