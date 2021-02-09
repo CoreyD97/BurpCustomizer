@@ -43,7 +43,7 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
         originalBurpTheme = UIManager.getLookAndFeel();
 
         String sourceEnum = callbacks.loadExtensionSetting("source");
-        if(sourceEnum.equalsIgnoreCase("")){
+        if(sourceEnum == null || sourceEnum.equalsIgnoreCase("")){
             themeSource = ThemeSource.BUILTIN;
         }else {
             themeSource = ThemeSource.valueOf(sourceEnum);
@@ -55,7 +55,7 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
         if(previousTheme.isPresent()) selectedBuiltIn = previousTheme.get();
 
         String themeFilePref = callbacks.loadExtensionSetting("themeFile");
-        if(!themeFilePref.equalsIgnoreCase("")){
+        if(themeFilePref != null && !themeFilePref.equalsIgnoreCase("")){
             selectedThemeFile = new File(themeFilePref);
             if(!selectedThemeFile.exists()) selectedThemeFile = null;
         }

@@ -8,11 +8,12 @@ import java.util.Properties;
 
 public class CustomTheme extends IntelliJTheme.ThemeLaf {
 
-    Class burpDark, burpLight;
+    Class burpLaf, burpDark, burpLight;
 
     public CustomTheme(IntelliJTheme.ThemeLaf base) {
         super(base.getTheme());
         try {
+            this.burpLaf = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpLaf");
             this.burpDark = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpDarkLaf");
             this.burpLight = ClassLoader.getSystemClassLoader().loadClass("burp.theme.BurpLightLaf");
         }catch (Exception e){
@@ -37,12 +38,14 @@ public class CustomTheme extends IntelliJTheme.ThemeLaf {
             defaults = super.getDefaults();
             BurpCustomizer.callbacks.printError("Could not get Burp base theme! - " + e.getMessage());
         }
-//        defaults = super.getDefaults(); //Debugging. Uncomment to overwrite all Burp defaults.
-        defaults.putAll(super.getDefaults());
+
+        UIDefaults superDefaults = super.getDefaults();
+        superDefaults.remove("SplitPaneUI"); //Do not remove Burp's UI delegates.
+        superDefaults.remove("TabbedPaneUI");
+        defaults.putAll(superDefaults);
 
         //For some reason, using lazy loading in getAdditionalDefaults for this property causes issues...
         defaults.put("TabbedPane.selectedBackground", defaults.get("TabbedPane.background"));
-
         return defaults;
     }
 
