@@ -4,7 +4,9 @@ import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.IntelliJTheme;
 
 import javax.swing.*;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 public class CustomTheme extends IntelliJTheme.ThemeLaf {
 

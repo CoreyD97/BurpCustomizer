@@ -101,8 +101,8 @@ public class PreviewPanel extends JPanel {
         JPasswordFieldDisabledNotEditable.setEditable(false);
         JPasswordFieldEnabledNotEditable.setEditable(false);
         
-        
-        JPanel basicComponents = PanelBuilder.build(new Component[][]{
+        PanelBuilder panelBuilder = new PanelBuilder();
+        panelBuilder.setComponentGrid(new Component[][]{
                 new Component[]{new JLabel("JLabel:"), jLabelEnabled, jLabelDisabled, null, null},
                 new Component[]{new JLabel("JButton:"), jbuttonEnabled, jbuttonDisabled, null, null},
                 new Component[]{new JLabel("JCheckBox:"), JCheckBoxEnabled, JCheckBoxDisabled, JCheckBoxEnabledSelected, JCheckBoxDisabledSelected},
@@ -111,7 +111,9 @@ public class PreviewPanel extends JPanel {
                 new Component[]{new JLabel("JSpinner:"), JSpinnerEnabled, JSpinnerDisabled, null, null},
                 new Component[]{new JLabel("JTextField:"), JTextFieldEnabled, JTextFieldDisabled, JTextFieldEnabledNotEditable, JTextFieldDisabledNotEditable},
                 new Component[]{new JLabel("JPasswordField:"), JPasswordFieldEnabled, JPasswordFieldDisabled, JPasswordFieldEnabledNotEditable, JPasswordFieldDisabledNotEditable},
-        }, Alignment.FILL, 1.0, 1.0);
+        });
+        panelBuilder.setAlignment(Alignment.FILL);
+        JPanel basicComponents = panelBuilder.build();
         basicComponents.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JTextArea jTextArea = new JTextArea("An editable text area");
@@ -131,7 +133,8 @@ public class PreviewPanel extends JPanel {
         JTree jTree = new JTree(treeNode);
         JList<String> jList = new JList<>(new String[]{"Item A","Item B","Item C","Item D","Item E","Item F"});
 
-        JPanel otherComponents = PanelBuilder.build(new Component[][]{
+        panelBuilder = new PanelBuilder();
+        panelBuilder.setComponentGrid(new Component[][]{
                 new Component[]{new JLabel("JEditor"), null},
                 new Component[]{jScrollPane, jScrollPane},
                 new Component[]{jScrollPane, jScrollPane},
@@ -139,7 +142,8 @@ public class PreviewPanel extends JPanel {
                 new Component[]{jTable, jTable},
                 new Component[]{new JLabel("JTree"), new JLabel("JList")},
                 new Component[]{new JScrollPane(jTree), new JScrollPane(jList)},
-        }, new int[][]{
+        });
+        int[][] weights = new int[][]{
                 new int[]{0, 0},
                 new int[]{1, 1},
                 new int[]{1, 1},
@@ -147,7 +151,11 @@ public class PreviewPanel extends JPanel {
                 new int[]{1, 1},
                 new int[]{0, 0},
                 new int[]{5, 5},
-        }, Alignment.FILL, 1.0, 1.0);
+        };
+        panelBuilder.setGridWeightsX(weights);
+        panelBuilder.setGridWeightsY(weights);
+        panelBuilder.setAlignment(Alignment.FILL);
+        JPanel otherComponents = panelBuilder.build();
 
         JTabbedPane jTabbedPane = new JTabbedPane();
         jTabbedPane.add("Basic", basicComponents);

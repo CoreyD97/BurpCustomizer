@@ -12,19 +12,26 @@ repositories {
 
 dependencies {
     compile 'net.portswigger.burp.extender:burp-extender-api:1.7.22'
-    compile 'com.github.CoreyD97:BurpExtenderUtilities:409993f'
-    compileOnly 'com.formdev:flatlaf:0.45'
-    compile 'com.formdev:flatlaf-intellij-themes:0.45'
-    testCompile 'com.formdev:flatlaf-extras:0.45'
-    testCompile files('/opt/BurpSuitePro/burpsuite_pro.jar')
+    compile 'com.github.CoreyD97:BurpExtenderUtilities:c03544e3'
+    compileOnly 'com.formdev:flatlaf:1.1.2'
+    compile 'com.formdev:flatlaf-intellij-themes:1.1.2'
+    compile 'com.formdev:flatlaf-extras:1.1.2'
+    runtimeOnly files('/home/corey/BurpSuitePro/burpsuite_pro.jar')
 //    testCompile files('/home/corey/BurpSuiteCommunity/burpsuite_community.jar')
-//    testRuntime files('/tmp/test.jar')
+    testRuntime files('/home/corey/BurpSuitePro/burpsuite_pro.deobf.jar')
 }
 
 jar {
     baseName = project.name
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
+
+task customFatJar(type: Jar) {
+    baseName = project.name + "-TEST"
+    from { configurations.testCompile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 
 configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'

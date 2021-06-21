@@ -12,6 +12,8 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -197,6 +199,7 @@ public class CustomizerPanel extends JPanel {
                 });
             }
         });
+//        applyThemeButton.setMinimumSize(applyThemeButton.getSize());
 
         if(customizer.getThemeSource() == BurpCustomizer.ThemeSource.BUILTIN && customizer.getSelectedBuiltIn() != null) {
             lookAndFeelSelector.setSelectedItem(customizer.getSelectedBuiltIn());
@@ -207,23 +210,34 @@ public class CustomizerPanel extends JPanel {
             selectedThemeFile = selectedFile;
         }
 
-        JPanel selectorPanel = PanelBuilder.build(new Component[][]{
+        PanelBuilder selectorPanelBuilder = new PanelBuilder();
+        selectorPanelBuilder.setComponentGrid(new Component[][]{
                 new Component[]{themeLabel, themeLabel},
                 new Component[]{defaultThemeLabel, lookAndFeelSelector},
                 new Component[]{fileThemeLabel, selectFileButton},
                 new Component[]{previewPanel, previewPanel},
                 new Component[]{applyThemeButton, applyThemeButton},
-        }, new int[][]{
+        });
+        int[][] selectorPanelWeights = new int[][]{
                 new int[]{0, 0},
+                new int[]{1, 1},
                 new int[]{1, 1},
                 new int[]{3, 3},
                 new int[]{1, 1},
-        }, Alignment.FILL, 1.0, 1.0);
+        };
+        selectorPanelBuilder.setGridWeightsX(selectorPanelWeights);
+        selectorPanelBuilder.setGridWeightsY(selectorPanelWeights);
+        selectorPanelBuilder.setAlignment(Alignment.FILL);
+
+        JPanel selectorPanel = selectorPanelBuilder.build();
 
         lookAndFeelSelector.setEnabled(customizer.isCompatible());
 
         JLabel incompatibleWarning = new JLabel("Burp Customizer requires Burp Suite 2020.12 or above.");
         incompatibleWarning.setForeground(new Color(219, 53, 53));
+
+        JPanel fillerPanel = new JPanel();
+        fillerPanel.setMaximumSize(new Dimension(0,0));
 
         Component[][] componentGrid = new Component[][]{
                 new Component[]{headerLabel},
@@ -232,11 +246,11 @@ public class CustomizerPanel extends JPanel {
                 new Component[]{contactPanel},
                 new Component[]{aboutContent},
                 new Component[]{selectorPanel},
-                new Component[]{customizer.isCompatible() ? new JPanel() : incompatibleWarning},
-                new Component[]{new JPanel()}
+                new Component[]{customizer.isCompatible() ? fillerPanel : incompatibleWarning},
+//                new Component[]{fillerPanel}
         };
 
-        int[][] weightGrid = new int[][]{
+        int[][] weightGridY = new int[][]{
                 new int[]{0},
                 new int[]{0},
                 new int[]{0},
@@ -244,13 +258,31 @@ public class CustomizerPanel extends JPanel {
                 new int[]{0},
                 new int[]{0},
                 new int[]{0},
-                new int[]{10},
+                new int[]{1000},
         };
 
-        JPanel contentPanel = PanelBuilder.build(componentGrid, weightGrid, Alignment.FILL, 0.8, 1.0);
+        PanelBuilder contentPanelBuilder = new PanelBuilder();
+        contentPanelBuilder.setComponentGrid(componentGrid);
+//        contentPanelBuilder.setGridWeightsX(weightGridY);
+        contentPanelBuilder.setGridWeightsY(weightGridY);
+        contentPanelBuilder.setScaleX(0.8);
+        contentPanelBuilder.setScaleY(1.0);
+        contentPanelBuilder.setAlignment(Alignment.FILL);
+
+        JPanel contentPanel = contentPanelBuilder.build();
         contentPanel.setBorder(new EmptyBorder(30, 30, 30, 30));
 
-        this.add(contentPanel, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                contentPanel.setPreferredSize(new Dimension(e.getComponent().getWidth(), contentPanel.getHeight()));
+            }
+        });
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        this.add(scrollPane, BorderLayout.CENTER);
     }
 
     private ImageIcon getGithubIcon(){

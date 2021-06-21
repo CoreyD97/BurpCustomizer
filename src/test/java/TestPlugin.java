@@ -1,3 +1,5 @@
+import com.formdev.flatlaf.extras.FlatUIDefaultsInspector;
+
 import java.lang.reflect.Method;
 
 public class TestPlugin {
