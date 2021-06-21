@@ -257,13 +257,12 @@ public class CustomizerPanel extends JPanel {
                 new int[]{0},
                 new int[]{0},
                 new int[]{0},
-                new int[]{0},
-                new int[]{1000},
+                new int[]{1},
         };
 
         PanelBuilder contentPanelBuilder = new PanelBuilder();
         contentPanelBuilder.setComponentGrid(componentGrid);
-//        contentPanelBuilder.setGridWeightsX(weightGridY);
+        contentPanelBuilder.setGridWeightsX(weightGridY);
         contentPanelBuilder.setGridWeightsY(weightGridY);
         contentPanelBuilder.setScaleX(0.8);
         contentPanelBuilder.setScaleY(1.0);
