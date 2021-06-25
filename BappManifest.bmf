@@ -1,0 +1,12 @@
+Uuid: 4265b6220a524d0da966e64e94fa9b26
+ExtensionType: 1
+Name: Customizer
+RepoName: customizer
+ScreenVersion: 1.0.2
+SerialVersion: 1
+MinPlatformVersion: 0
+ProOnly: False
+Author: CoreyD97
+ShortDescription: Use different themes with Burp Suite.
+EntryPoint: releases/BurpCustomizer.jar
+BuildCommand: gradle jar
