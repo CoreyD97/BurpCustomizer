@@ -18,7 +18,6 @@ dependencies {
     compile 'com.formdev:flatlaf-extras:1.1.2'
     runtimeOnly files('/home/corey/BurpSuitePro/burpsuite_pro.jar')
 //    testCompile files('/home/corey/BurpSuiteCommunity/burpsuite_community.jar')
-    testRuntime files('/home/corey/BurpSuitePro/burpsuite_pro.deobf.jar')
 }
 
 jar {
