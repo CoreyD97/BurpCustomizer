@@ -18,8 +18,10 @@ _Everybody knows hackers only work at night, so for years people asked PortSwigg
 When they did, hackers rejoiced everywhere! But, some still wanted more... Until... Burp Customizer!_  
 
 Burp Suite 2020.12 replaced the old Look and Feel classes with FlatLaf, an open source Look and Feel class
-which also supports 3rd party themes developed for the IntelliJ Platform. This extension allows you to use
+which also supports 3rd party [themes developed for the IntelliJ Platform][1]. This extension allows you to use
 these themes in Burp Suite, and includes a number of bundled themes to try.
+
+[1]:https://github.com/JFormDesigner/FlatLaf/tree/main/flatlaf-intellij-themes
 
 **Images:**
 <table>
