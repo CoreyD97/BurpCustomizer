@@ -14,10 +14,10 @@ repositories {
 dependencies {
     compile 'net.portswigger.burp.extender:burp-extender-api:1.7.22'
     compile 'com.github.CoreyD97:BurpExtenderUtilities:c03544e3'
-    compileOnly 'com.formdev:flatlaf:1.1.2'
-    compile 'com.formdev:flatlaf-intellij-themes:1.1.2'
-    compile 'com.formdev:flatlaf-extras:1.1.2'
-    runtimeOnly files('/home/corey/BurpSuitePro/burpsuite_pro.jar')
+    compileOnly 'com.formdev:flatlaf:2.4'
+    compile 'com.formdev:flatlaf-intellij-themes:2.4'
+    compile 'com.formdev:flatlaf-extras:2.4'
+//    runtimeOnly files('/home/corey/BurpSuitePro/burpsuite_pro.jar')
 //    testCompile files('/home/corey/BurpSuiteCommunity/burpsuite_community.jar')
 }
 
@@ -26,7 +26,7 @@ jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
-task customFatJar(type: Jar) {
+task testJar(type: Jar) {
     baseName = project.name + "-TEST"
     from { configurations.testCompile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar

@@ -146,6 +146,9 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
             callbacks.printError("Could not load theme.");
             callbacks.printError(sw.toString());
             JOptionPane.showMessageDialog(getUiComponent(), "Could not load the specified theme.\n" + ex.getMessage(), "Burp Customizer", JOptionPane.ERROR_MESSAGE);
+            try{ //Fall back to built in theme if we encounter an issue.
+                UIManager.setLookAndFeel(originalBurpTheme);
+            }catch (Exception ignored){}
         }
     }
 
@@ -171,6 +174,9 @@ public class BurpCustomizer implements ITab, IBurpExtender, IExtensionStateListe
             callbacks.printError("Could not load theme.");
             callbacks.printError(sw.toString());
             JOptionPane.showMessageDialog(getUiComponent(), "Could not load the specified theme:\n" + ex.getMessage(), "Burp Customizer", JOptionPane.ERROR_MESSAGE);
+            try{ //Fall back to built in theme if we encounter an issue.
+                UIManager.setLookAndFeel(originalBurpTheme);
+            }catch (Exception ignored){}
         }
     }
 
