@@ -3,7 +3,7 @@ package com.coreyd97.burpcustomizer;
 import com.coreyd97.BurpExtenderUtilities.Alignment;
 import com.coreyd97.BurpExtenderUtilities.PanelBuilder;
 import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.IntelliJTheme;
+import lombok.SneakyThrows;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -23,10 +23,14 @@ import java.net.URL;
 
 public class CustomizerPanel extends JPanel {
 
+    private final BurpCustomizer customizer;
     JButton viewOnGithubButton;
     private File selectedThemeFile;
+    public final PreviewPanel previewPanel;
+    private final JComboBox<UIManager.LookAndFeelInfo> lookAndFeelSelector;
 
     public CustomizerPanel(BurpCustomizer customizer){
+        this.customizer = customizer;
         this.setLayout(new BorderLayout());
 
         JLabel headerLabel = new JLabel("Burp Customizer");
@@ -128,13 +132,13 @@ public class CustomizerPanel extends JPanel {
 
         aboutContent.setBorder(new EmptyBorder(0, 0, 20, 0));
 
-        PreviewPanel previewPanel = new PreviewPanel();
+        previewPanel = new PreviewPanel();
         previewPanel.setBorder(new EmptyBorder(10, 0, 10, 0));
 
         JLabel themeLabel = new JLabel("Select Theme");
         themeLabel.setFont(themeLabel.getFont().deriveFont(Font.BOLD));
 
-        JComboBox<UIManager.LookAndFeelInfo> lookAndFeelSelector = new JComboBox<>();
+        lookAndFeelSelector = new JComboBox<>();
         lookAndFeelSelector.setRenderer(new LookAndFeelRenderer());
         for (UIManager.LookAndFeelInfo theme : customizer.getThemes()) {
             lookAndFeelSelector.addItem(theme);
@@ -149,9 +153,10 @@ public class CustomizerPanel extends JPanel {
                 selectedThemeFile = null;
                 selectFileButton.setText("Select Theme File...");
                 try{
-                    LookAndFeel theme = customizer.createThemeFromDefaults((UIManager.LookAndFeelInfo) e.getItem());
-                    previewPanel.setTheme(theme);
+                    LookAndFeel theme = customizer.createThemeFromDefaults((UIManager.LookAndFeelInfo) e.getItem(), true);
+                    previewPanel.setPreviewTheme(theme);
                 }catch (Exception ex){
+                    ex.printStackTrace();
                     previewPanel.reset();
                     JOptionPane.showMessageDialog(CustomizerPanel.this, "Could not load the specified theme.\n" + ex.getMessage(), "Burp Customizer", JOptionPane.ERROR_MESSAGE);
                 }
@@ -171,7 +176,7 @@ public class CustomizerPanel extends JPanel {
                     selectFileButton.setText(fileChooser.getSelectedFile().getName());
                     try {
                         LookAndFeel theme = customizer.createThemeFromFile(fileChooser.getSelectedFile());
-                        previewPanel.setTheme(theme);
+                        previewPanel.setPreviewTheme(theme);
                         selectedThemeFile = fileChooser.getSelectedFile();
                     } catch (IOException | UnsupportedLookAndFeelException ex) {
                         previewPanel.reset();
@@ -187,7 +192,7 @@ public class CustomizerPanel extends JPanel {
         JButton applyThemeButton = new JButton(new AbstractAction("Apply") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(() -> {
+//                SwingUtilities.invokeLater(() -> {
                     if(lookAndFeelSelector.getSelectedItem() != null) {
                         customizer.setTheme((UIManager.LookAndFeelInfo) lookAndFeelSelector.getSelectedItem());
                     }else if(selectedThemeFile != null){
@@ -196,7 +201,7 @@ public class CustomizerPanel extends JPanel {
                         JOptionPane.showMessageDialog(CustomizerPanel.this, "No theme selected!", "Burp Customizer", JOptionPane.ERROR_MESSAGE);
                     }
                     viewOnGithubButton.setIcon(getGithubIcon());
-                });
+//                });
             }
         });
 //        applyThemeButton.setMinimumSize(applyThemeButton.getSize());
@@ -231,11 +236,6 @@ public class CustomizerPanel extends JPanel {
 
         JPanel selectorPanel = selectorPanelBuilder.build();
 
-        lookAndFeelSelector.setEnabled(customizer.isCompatible());
-
-        JLabel incompatibleWarning = new JLabel("Burp Customizer requires Burp Suite 2020.12 or above.");
-        incompatibleWarning.setForeground(new Color(219, 53, 53));
-
         JPanel fillerPanel = new JPanel();
         fillerPanel.setMaximumSize(new Dimension(0,0));
 
@@ -246,7 +246,7 @@ public class CustomizerPanel extends JPanel {
                 new Component[]{contactPanel},
                 new Component[]{aboutContent},
                 new Component[]{selectorPanel},
-                new Component[]{customizer.isCompatible() ? fillerPanel : incompatibleWarning},
+                new Component[]{fillerPanel},
 //                new Component[]{fillerPanel}
         };
 
